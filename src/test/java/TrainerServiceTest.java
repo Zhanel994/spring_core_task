@@ -1,55 +1,132 @@
-import com.gym.config.AppConfig;
+import com.gym.dao.TrainerDao;
+import com.gym.exceptions.ValidationException;
 import com.gym.models.Trainer;
+import com.gym.models.User;
 import com.gym.services.TrainerService;
-import com.gym.storage.Storage;
+import com.gym.utils.PasswordGenerator;
+import com.gym.utils.UsernameGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-public class TrainerServiceTest {
+class TrainerServiceTest {
+
+    private TrainerDao trainerDao;
+    private UsernameGenerator usernameGenerator;
+    private PasswordGenerator passwordGenerator;
+
     private TrainerService service;
-    private Storage storage;
 
     @BeforeEach
     void setUp() {
-        var ctx = new AnnotationConfigApplicationContext(AppConfig.class);
-        service = ctx.getBean(TrainerService.class);
-        storage = ctx.getBean(Storage.class);
+        trainerDao = mock(TrainerDao.class);
+        usernameGenerator = mock(UsernameGenerator.class);
+        passwordGenerator = mock(PasswordGenerator.class);
 
-        storage.getTrainees().clear();
-        storage.getTrainers().clear();
-        storage.getTrainings().clear();
+        service = new TrainerService(
+                trainerDao,
+                usernameGenerator,
+                passwordGenerator
+        );
     }
 
     @Test
     void createTrainer() {
+        User user = new User();
+        user.setFirstName("Michael");
+        user.setLastName("Jordan");
+
         Trainer trainer = new Trainer();
-        trainer.setFirstName("Michael");
-        trainer.setLastName("Jordan");
+        trainer.setUser(user);
 
-        Trainer created = service.create(trainer);
+        when(usernameGenerator.generate("Michael", "Jordan"))
+                .thenReturn("Michael.Jordan");
 
-        assertNotNull(created.getId());
-        assertTrue(created.getUsername().startsWith("Michael.Jordan"));
-        assertEquals(10, created.getPassword().length());
+        when(passwordGenerator.generate())
+                .thenReturn("password");
+
+        Trainer result = service.create(trainer);
+
+        assertEquals("Michael.Jordan", result.getUser().getUsername());
+        assertEquals("password", result.getUser().getPassword());
+
+        verify(trainerDao).save(trainer);
     }
 
     @Test
-    void usernameUniqueness() {
-        Trainer trainer1 = new Trainer();
-        trainer1.setFirstName("Michael");
-        trainer1.setLastName("Jordan");
+    void shouldThrowIfNoFirstName() {
+        User user = new User();
+        user.setLastName("Jordan");
 
-        Trainer trainer2 = new Trainer();
-        trainer2.setFirstName("Michael");
-        trainer2.setLastName("Jordan");
+        Trainer trainer = new Trainer();
+        trainer.setUser(user);
 
-        Trainer created1 = service.create(trainer1);
-        Trainer created2 = service.create(trainer2);
+        assertThrows(ValidationException.class, () -> service.create(trainer));
+    }
 
-        assertEquals("Michael.Jordan", created1.getUsername());
-        assertEquals("Michael.Jordan1", created2.getUsername());
+    @Test
+    void shouldSetActiveTrue() {
+        User user = new User();
+        user.setActive(false);
+
+        Trainer trainer = new Trainer();
+        trainer.setUser(user);
+
+        when(trainerDao.findByUsername("michael"))
+                .thenReturn(trainer);
+
+        service.activate("michael");
+
+        assertTrue(user.isActive());
+        verify(trainerDao).save(trainer);
+    }
+
+    @Test
+    void shouldThrowIfAlreadyActive() {
+        User user = new User();
+        user.setActive(true);
+
+        Trainer trainer = new Trainer();
+        trainer.setUser(user);
+
+        when(trainerDao.findByUsername("michael"))
+                .thenReturn(trainer);
+
+        assertThrows(RuntimeException.class, () -> service.activate("michael"));
+    }
+
+    @Test
+    void shouldSetInactive() {
+        User user = new User();
+        user.setActive(true);
+
+        Trainer trainer = new Trainer();
+        trainer.setUser(user);
+
+        when(trainerDao.findByUsername("michael"))
+                .thenReturn(trainer);
+
+        service.deactivate("michael");
+
+        assertFalse(user.isActive());
+        verify(trainerDao).save(trainer);
+    }
+
+    @Test
+    void changePassword() {
+        User user = new User();
+        user.setPassword("old");
+
+        Trainer trainer = new Trainer();
+        trainer.setUser(user);
+
+        when(trainerDao.findByUsername("michael"))
+                .thenReturn(trainer);
+
+        service.changePassword("michael", "new");
+
+        assertEquals("new", user.getPassword());
     }
 }

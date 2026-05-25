@@ -1,70 +1,165 @@
-import com.gym.config.AppConfig;
+import com.gym.dao.TraineeDao;
+import com.gym.dao.TrainerDao;
+import com.gym.exceptions.ValidationException;
 import com.gym.models.Trainee;
+import com.gym.models.Trainer;
+import com.gym.models.User;
 import com.gym.services.TraineeService;
-import com.gym.storage.Storage;
+import com.gym.utils.PasswordGenerator;
+import com.gym.utils.UsernameGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-public class TraineeServiceTest {
+class TraineeServiceTest {
+
+    private TraineeDao traineeDao;
+    private TrainerDao trainerDao;
+    private UsernameGenerator usernameGenerator;
+    private PasswordGenerator passwordGenerator;
 
     private TraineeService service;
-    private Storage storage;
 
     @BeforeEach
     void setUp() {
-        var ctx = new AnnotationConfigApplicationContext(AppConfig.class);
-        service = ctx.getBean(TraineeService.class);
-        storage = ctx.getBean(Storage.class);
+        traineeDao = mock(TraineeDao.class);
+        trainerDao = mock(TrainerDao.class);
+        usernameGenerator = mock(UsernameGenerator.class);
+        passwordGenerator = mock(PasswordGenerator.class);
 
-        storage.getTrainees().clear();
-        storage.getTrainers().clear();
-        storage.getTrainings().clear();
+        service = new TraineeService(
+                traineeDao,
+                trainerDao,
+                usernameGenerator,
+                passwordGenerator
+        );
     }
 
     @Test
-    void createTrainee() {
+    void shouldGenerateUsernameAndPassword() {
+        User user = new User();
+        user.setFirstName("John");
+        user.setLastName("Smith");
+
         Trainee trainee = new Trainee();
-        trainee.setFirstName("John");
-        trainee.setLastName("Smith");
+        trainee.setUser(user);
 
-        Trainee created = service.create(trainee);
+        when(usernameGenerator.generate("John", "Smith"))
+                .thenReturn("John.Smith");
 
-        assertNotNull(created.getId());
-        assertTrue(created.getUsername().startsWith("John.Smith"));
-        assertEquals(10, created.getPassword().length());
+        when(passwordGenerator.generate())
+                .thenReturn("123456789");
+
+        Trainee result = service.create(trainee);
+
+        assertEquals("John.Smith", result.getUser().getUsername());
+        assertEquals("123456789", result.getUser().getPassword());
+        assertTrue(result.getUser().isActive());
+
+        verify(traineeDao).save(trainee);
     }
 
     @Test
-    void deleteTrainee() {
+    void shouldThrowIfNoFirstName() {
+        User user = new User();
+        user.setLastName("Smith");
+
         Trainee trainee = new Trainee();
-        trainee.setFirstName("John");
-        trainee.setLastName("Smith");
+        trainee.setUser(user);
 
-        Trainee created = service.create(trainee);
-
-        Long id = created.getId();
-        service.delete(id);
-
-        assertNull(service.get(id));
+        assertThrows(ValidationException.class, () -> service.create(trainee));
     }
 
     @Test
-    void usernameUniqueness() {
-        Trainee trainee1 = new Trainee();
-        trainee1.setFirstName("John");
-        trainee1.setLastName("Smith");
+    void shouldUpdatePassword() {
+        User user = new User();
+        user.setPassword("old");
 
-        Trainee trainee2 = new Trainee();
-        trainee2.setFirstName("John");
-        trainee2.setLastName("Smith");
+        Trainee trainee = new Trainee();
+        trainee.setUser(user);
 
-        Trainee created1 = service.create(trainee1);
-        Trainee created2 = service.create(trainee2);
+        when(traineeDao.findByUsername("john"))
+                .thenReturn(trainee);
 
-        assertEquals("John.Smith", created1.getUsername());
-        assertEquals("John.Smith1", created2.getUsername());
+        service.changePassword("john", "newPass");
+
+        assertEquals("newPass", trainee.getUser().getPassword());
+        verify(traineeDao).save(trainee);
+    }
+
+    @Test
+    void shouldThrowIfAlreadyActive() {
+        User user = new User();
+        user.setActive(true);
+
+        Trainee trainee = new Trainee();
+        trainee.setUser(user);
+
+        when(traineeDao.findByUsername("john"))
+                .thenReturn(trainee);
+
+        assertThrows(RuntimeException.class, () -> service.activate("john"));
+    }
+
+    @Test
+    void shouldSetInactive() {
+        User user = new User();
+        user.setActive(true);
+
+        Trainee trainee = new Trainee();
+        trainee.setUser(user);
+
+        when(traineeDao.findByUsername("john"))
+                .thenReturn(trainee);
+
+        service.deactivate("john");
+        assertFalse(user.isActive());
+    }
+
+    @Test
+    void shouldAssignTrainer() {
+        Trainee trainee = new Trainee();
+        Trainer trainer = new Trainer();
+
+        when(traineeDao.findByUsername("john"))
+                .thenReturn(trainee);
+
+        when(trainerDao.findById(1L))
+                .thenReturn(trainer);
+
+        service.assignTrainer("john", 1L);
+
+        assertTrue(trainee.getTrainers().contains(trainer));
+        assertTrue(trainer.getTrainees().contains(trainee));
+
+        verify(traineeDao).save(trainee);
+        verify(trainerDao).save(trainer);
+    }
+
+    @Test
+    void shouldUpdateList() {
+        Trainee trainee = new Trainee();
+
+        Trainer t1 = new Trainer();
+        Trainer t2 = new Trainer();
+
+        when(traineeDao.findByUsername("john"))
+                .thenReturn(trainee);
+
+        when(trainerDao.findById(1L))
+                .thenReturn(t1);
+
+        when(trainerDao.findById(2L))
+                .thenReturn(t2);
+
+        service.updateTrainerList("john", List.of(1L, 2L));
+
+        assertEquals(2, trainee.getTrainers().size());
+
+        verify(traineeDao).save(trainee);
     }
 }

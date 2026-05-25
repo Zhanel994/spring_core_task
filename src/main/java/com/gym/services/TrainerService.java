@@ -1,42 +1,60 @@
 package com.gym.services;
 
 import com.gym.dao.TrainerDao;
+import com.gym.exceptions.EntityNotFoundException;
+import com.gym.exceptions.ValidationException;
 import com.gym.models.Trainer;
-import com.gym.storage.Storage;
+import com.gym.models.User;
+import com.gym.utils.PasswordGenerator;
 import com.gym.utils.UsernameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
+//service for trainer business logic
 @Service
+@Transactional
 public class TrainerService {
     private static final Logger log = LoggerFactory.getLogger(TrainerService.class);
 
-    @Autowired
-    private TrainerDao trainerDao;
+    private final TrainerDao trainerDao;
+    private final UsernameGenerator usernameGenerator;
+    private final PasswordGenerator passwordGenerator;
 
-    @Autowired
-    private UsernameGenerator usernameGenerator;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    @Autowired
-    private Storage storage;
+    public TrainerService(TrainerDao trainerDao, UsernameGenerator usernameGenerator, PasswordGenerator passwordGenerator) {
+        this.trainerDao = trainerDao;
+        this.usernameGenerator = usernameGenerator;
+        this.passwordGenerator = passwordGenerator;
+    }
 
+    //creates trainer
     public Trainer create(Trainer trainer) {
-        trainer.setId(storage.generateTrainerId());
-        trainer.setUsername(usernameGenerator.generate(trainer.getFirstName(), trainer.getLastName()));
-        trainer.setPassword(generatePassword());
+        validate(trainer);
+
+        User user = trainer.getUser();
+
+        user.setUsername(usernameGenerator.generate(user.getFirstName(), user.getLastName()));
+        user.setPassword(passwordGenerator.generate());
+        user.setActive(true);
 
         trainerDao.save(trainer);
 
-        log.info("Trainer created: id={}, username={}", trainer.getId(), trainer.getUsername());
+        log.info("Trainer created: {}", user.getUsername());
 
         return trainer;
     }
 
+    //updates existing trainer
     public Trainer update(Trainer trainer) {
+        validate(trainer);
+
         trainerDao.save(trainer);
 
         log.info("Trainer updated: id={}", trainer.getId());
@@ -44,15 +62,71 @@ public class TrainerService {
         return trainer;
     }
 
+    //gets trainer by id
     public Trainer get(Long id) {
-        Trainer trainer = trainerDao.findById(id);
-
-        log.info("Trainer fetched: id={}, found={}", id, trainer != null);
-
-        return trainer;
+        return trainerDao.findById(id);
     }
 
-    private String generatePassword() {
-        return UUID.randomUUID().toString().substring(0, 10);
+    public void changePassword(String username, String newPassword) {
+        Trainer trainer = trainerDao.findByUsername(username);
+
+        if (trainer == null) {
+            throw new EntityNotFoundException("Trainer not found!");
+        }
+
+        trainer.getUser().setPassword(newPassword);
+
+        trainerDao.save(trainer);
+    }
+
+    public void activate(String username) {
+        Trainer trainer = trainerDao.findByUsername(username);
+
+        if (trainer == null) {
+            throw new EntityNotFoundException("Trainer not found!");
+        }
+
+        if(trainer.getUser().isActive()) {
+            throw new RuntimeException("Already active!");
+        }
+
+        trainer.getUser().setActive(true);
+        trainerDao.save(trainer);
+    }
+
+    public void deactivate(String username) {
+        Trainer trainer = trainerDao.findByUsername(username);
+
+        if (trainer == null) {
+            throw new EntityNotFoundException("Trainer not found!");
+        }
+
+        if(!trainer.getUser().isActive()) {
+            throw new RuntimeException("Already inactive!");
+        }
+
+        trainer.getUser().setActive(false);
+
+        trainerDao.save(trainer);
+    }
+
+    public Trainer getByUsername(String username) {
+        return trainerDao.findByUsername(username);
+    }
+
+    private void validate(Trainer trainer) {
+        User user = trainer.getUser();
+
+        if (user == null) {
+            throw new ValidationException("User required!");
+        }
+
+        if (user.getFirstName() == null || user.getFirstName().isBlank()) {
+            throw new ValidationException("First name required!");
+        }
+
+        if (user.getLastName() == null || user.getLastName().isBlank()) {
+            throw new ValidationException("Last name required");
+        }
     }
 }
