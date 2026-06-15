@@ -1,9 +1,8 @@
 package com.gym.utils;
 
 import org.springframework.stereotype.Component;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 //utility class for generating unique usernames
 @Component

@@ -8,6 +8,7 @@ public class TrainingRequest {
     private String trainingName;
     private LocalDate trainingDate;
     private int duration;
+    private String trainingType;
 
     public String getTraineeUsername() {
         return traineeUsername;
@@ -47,5 +48,13 @@ public class TrainingRequest {
 
     public void setDuration(int duration) {
         this.duration = duration;
+    }
+
+    public String getTrainingType() {
+        return trainingType;
+    }
+
+    public void setTrainingType(String trainingType) {
+        this.trainingType = trainingType;
     }
 }

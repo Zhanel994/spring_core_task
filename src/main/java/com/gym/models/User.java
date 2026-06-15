@@ -1,6 +1,6 @@
 package com.gym.models;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 //entity representing user credentials
 @Entity

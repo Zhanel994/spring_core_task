@@ -1,0 +1,260 @@
+{
+  "info": {
+    "_postman_id": "6aba7002-edb6-43a2-aae9-a522354fb744",
+    "name": "gym_app",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "47224443"
+  },
+  "item": [
+    {
+      "name": "trainee_register",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"firstName\": \"John\",\r\n  \"lastName\": \"Smith\",\r\n  \"dateOfBirth\": \"2000-01-01\",\r\n  \"address\": \"Almaty\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/trainees/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "trainees",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get_trainee",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/trainees/John.Smith",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "trainees",
+            "John.Smith"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "trainee_logiin",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/login?username=John.Smith&password=033ad2d1-a",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ],
+          "query": [
+            {
+              "key": "username",
+              "value": "John.Smith"
+            },
+            {
+              "key": "password",
+              "value": "033ad2d1-a"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "trainee_update",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"username\": \"John.Smith\",\r\n  \"firstName\": \"Johnny\",\r\n  \"lastName\": \"Smith\",\r\n  \"dateOfBirth\": \"2000-01-01\",\r\n  \"address\": \"Astana\",\r\n  \"active\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/trainees",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "trainees"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete_trainee",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/trainees/John.Smith",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "trainees",
+            "John.Smith"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "trainer_register",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"firstName\": \"Michael\",\r\n  \"lastName\": \"Jordan\",\r\n  \"specialization\": \"Basketball\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/trainers/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "trainers",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get_trainer",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/trainers/Michael.Jordan",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "trainers",
+            "Michael.Jordan"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "trainer_update",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"username\": \"Michael.Jordan\",\r\n  \"firstName\": \"Mike\",\r\n  \"lastName\": \"Jordan\",\r\n  \"active\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/trainers",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "trainers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "trainings_add",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"traineeUsername\": \"John.Smith\",\r\n  \"trainerUsername\": \"Michael.Jordan\",\r\n  \"trainingName\": \"Basketball\",\r\n  \"trainingDate\": \"2026-06-15\",\r\n  \"duration\": 60,\r\n  \"trainingType\": \"Sport\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/trainings",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "trainings"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

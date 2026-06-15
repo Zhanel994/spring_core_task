@@ -1,11 +1,11 @@
 package com.gym.dao;
 
 import com.gym.models.Trainee;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 //DAO for trainee entity
 @Repository

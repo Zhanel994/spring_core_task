@@ -2,10 +2,9 @@ package com.gym.services;
 
 import com.gym.exceptions.AuthenticationException;
 import com.gym.models.User;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 //service for user authentication
 @Service

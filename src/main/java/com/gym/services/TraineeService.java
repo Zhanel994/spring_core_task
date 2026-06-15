@@ -6,7 +6,6 @@ import com.gym.exceptions.EntityNotFoundException;
 import com.gym.exceptions.ValidationException;
 import com.gym.models.Trainee;
 import com.gym.models.Trainer;
-import com.gym.models.Training;
 import com.gym.models.User;
 import com.gym.utils.PasswordGenerator;
 import com.gym.utils.UsernameGenerator;
@@ -15,9 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.time.LocalDate;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import java.util.stream.Collectors;
 

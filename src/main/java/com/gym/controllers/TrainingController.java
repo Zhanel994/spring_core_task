@@ -1,12 +1,14 @@
 package com.gym.controllers;
 
+import com.gym.dao.TrainingTypeDao;
 import com.gym.dto.requests.TrainingRequest;
 import com.gym.dto.responses.TrainingResponse;
 import com.gym.models.Training;
+import com.gym.models.TrainingType;
 import com.gym.services.TraineeService;
 import com.gym.services.TrainerService;
 import com.gym.services.TrainingService;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,16 +19,18 @@ import java.util.stream.Collectors;
 //REST Controller for trainings
 @RestController
 @RequestMapping("api/v1")
-@Api(tags = "Training API")
+@Tag(name = "Training API")
 public class TrainingController {
     private final TrainingService trainingService;
     private final TraineeService traineeService;
     private final TrainerService trainerService;
+    private final TrainingTypeDao trainingTypeDao;
 
-    public TrainingController(TrainingService trainingService, TrainerService trainerService, TraineeService traineeService) {
+    public TrainingController(TrainingService trainingService, TrainerService trainerService, TraineeService traineeService, TrainingTypeDao trainingTypeDao) {
         this.trainingService = trainingService;
         this.traineeService = traineeService;
         this.trainerService = trainerService;
+        this.trainingTypeDao = trainingTypeDao;
     }
 
     //returns trainee trainings
@@ -86,6 +90,7 @@ public class TrainingController {
         training.setTrainingName(request.getTrainingName());
         training.setTrainingDate(request.getTrainingDate());
         training.setDuration(request.getDuration());
+        training.setTrainingType(trainingTypeDao.findByName(request.getTrainingType()));
 
         trainingService.create(training);
 

@@ -8,8 +8,9 @@ import com.gym.dto.responses.TrainerProfileResponse;
 import com.gym.models.Trainer;
 import com.gym.models.User;
 import com.gym.services.TrainerService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 //REST Controller for trainers
 @RestController
 @RequestMapping("api/v1/trainers")
-@Api(tags = "Trainer API")
+@Tag(name = "Trainer API")
 public class TrainerController {
     private final TrainerService trainerService;
 
@@ -28,7 +29,13 @@ public class TrainerController {
 
     //registers a new trainer
     @PostMapping("/register")
-    @ApiOperation("Register trainer")
+    @Operation(
+            summary = "Trainer Registration",
+            description = "Creates trainer user",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Trainer registered successfully")
+            }
+    )
     public RegistrationResponse register(@RequestBody TrainerRegistrationRequest registrationRequest) {
         User user = new User();
         user.setFirstName(registrationRequest.getFirstName());
@@ -86,7 +93,7 @@ public class TrainerController {
 
     //changes trainer status
     @PatchMapping("/{username}/status")
-    public ResponseEntity<String> changeTrainerStatus(@RequestParam String username, @RequestParam boolean isActive) {
+    public ResponseEntity<String> changeTrainerStatus(@PathVariable String username, @RequestParam boolean isActive) {
         Trainer trainer = trainerService.getByUsername(username);
         trainer.getUser().setActive(isActive);
         trainerService.update(trainer);

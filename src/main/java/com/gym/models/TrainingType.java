@@ -1,6 +1,6 @@
 package com.gym.models;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 //entity representing training type
 @Entity

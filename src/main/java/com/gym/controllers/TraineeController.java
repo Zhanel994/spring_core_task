@@ -10,8 +10,9 @@ import com.gym.models.Trainee;
 import com.gym.models.User;
 import com.gym.services.TraineeService;
 import com.gym.services.TrainingService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 //REST Controller for trainees
 @RestController
 @RequestMapping("api/v1/trainees")
-@Api(tags = "Trainee API")
+@Tag(name = "Trainee API")
 public class TraineeController {
     private final TraineeService traineeService;
     private final TrainingService trainingService;
@@ -33,7 +34,13 @@ public class TraineeController {
 
     //registers a new trainee
     @PostMapping("/register")
-    @ApiOperation("Register trainee")
+    @Operation(
+            summary = "Trainee Registration",
+            description = "Creates trainee user",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Trainee registered successfully")
+            }
+    )
     public RegistrationResponse register(@RequestBody TraineeRegistrationRequest registrationRequest) {
         User user = new User();
         user.setFirstName(registrationRequest.getFirstName());
@@ -51,7 +58,13 @@ public class TraineeController {
 
     //returns trainee profile by username
     @GetMapping("/{username}")
-    @ApiOperation("Get trainee profile")
+    @Operation(
+            summary = "Trainee Profile",
+            description = "Gets trainee profile",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Got trainee profile successfully")
+            }
+    )
     public TraineeProfileResponse getProfile(@PathVariable String username) {
         Trainee trainee = traineeService.getByUsername(username);
 
@@ -80,7 +93,13 @@ public class TraineeController {
 
     //updates trainee
     @PutMapping
-    @ApiOperation("Update trainee")
+    @Operation(
+            summary = "Update Trainee",
+            description = "Updates trainee information",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Trainee updated successfully")
+            }
+    )
     public TraineeProfileResponse update(@RequestBody UpdateTraineeRequest updateTraineeRequest) {
         Trainee trainee = traineeService.getByUsername(updateTraineeRequest.getUsername());
 
@@ -97,7 +116,13 @@ public class TraineeController {
 
     //deletes trainee by username
     @DeleteMapping("/{username}")
-    @ApiOperation("Delete trainee")
+    @Operation(
+            summary = "Delete Trainee",
+            description = "Deletes trainee",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Trainee deleted successfully")
+            }
+    )
     public ResponseEntity<String> delete(@PathVariable String username) {
         traineeService.deleteByUsername(username);
 
@@ -146,7 +171,7 @@ public class TraineeController {
 
     //changes status by username
     @PatchMapping("/{username}/status")
-    public ResponseEntity<String> changeTraineeStatus(@RequestParam String username, @RequestParam boolean isActive) {
+    public ResponseEntity<String> changeTraineeStatus(@PathVariable String username, @RequestParam boolean isActive) {
         Trainee trainee = traineeService.getByUsername(username);
         trainee.getUser().setActive(isActive);
         traineeService.update(trainee);
