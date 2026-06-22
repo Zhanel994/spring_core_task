@@ -1,11 +1,13 @@
 package com.gym.controllers;
 
 import com.gym.dto.requests.ChangePasswordRequest;
+import com.gym.dto.requests.LoginRequest;
 import com.gym.services.AuthService;
 import com.gym.services.TraineeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,9 +32,13 @@ public class AuthController {
                     @ApiResponse(responseCode = "201", description = "User logged successfully")
             }
     )
-    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
-        boolean result = authService.authenticate(username, password);
-        if(!result) {
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request) {
+        boolean result = authService.authenticate(
+                request.getUsername(),
+                request.getPassword()
+        );
+
+        if (!result) {
             return ResponseEntity.badRequest().body("Invalid credentials!");
         }
 
@@ -46,7 +52,8 @@ public class AuthController {
             responses = {
                     @ApiResponse(responseCode = "201", description = "Password changed successfully")
             }
-    )    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+    )
+    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
         boolean authenticated = authService.authenticate(changePasswordRequest.getUsername(), changePasswordRequest.getOldPassword());
 
         if(!authenticated) {

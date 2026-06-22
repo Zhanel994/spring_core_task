@@ -1,8 +1,15 @@
 package com.gym.dto.requests;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class TrainerRegistrationRequest {
+    @NotBlank
     private String firstName;
+
+    @NotBlank
     private String lastName;
+
+    @NotBlank
     private String specialization;
 
     public String getFirstName() {

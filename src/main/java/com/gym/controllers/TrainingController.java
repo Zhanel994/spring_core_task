@@ -9,6 +9,7 @@ import com.gym.services.TraineeService;
 import com.gym.services.TrainerService;
 import com.gym.services.TrainingService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -81,7 +82,7 @@ public class TrainingController {
 
     //creates a new training
     @PostMapping("/trainings")
-    public ResponseEntity<String> addTraining(@RequestBody TrainingRequest request) {
+    public ResponseEntity<String> addTraining(@Valid @RequestBody TrainingRequest request) {
 
         Training training = new Training();
 

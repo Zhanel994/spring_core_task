@@ -1,9 +1,17 @@
 package com.gym.dto.requests;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class UpdateTrainerRequest {
+    @NotBlank
     private String username;
+
+    @NotBlank
     private String firstName;
+
+    @NotBlank
     private String lastName;
+
     private boolean active;
 
     public String getUsername() {

@@ -13,6 +13,7 @@ import com.gym.services.TrainingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,7 +42,7 @@ public class TraineeController {
                     @ApiResponse(responseCode = "201", description = "Trainee registered successfully")
             }
     )
-    public RegistrationResponse register(@RequestBody TraineeRegistrationRequest registrationRequest) {
+    public RegistrationResponse register(@Valid @RequestBody TraineeRegistrationRequest registrationRequest) {
         User user = new User();
         user.setFirstName(registrationRequest.getFirstName());
         user.setLastName(registrationRequest.getLastName());
@@ -100,7 +101,7 @@ public class TraineeController {
                     @ApiResponse(responseCode = "201", description = "Trainee updated successfully")
             }
     )
-    public TraineeProfileResponse update(@RequestBody UpdateTraineeRequest updateTraineeRequest) {
+    public TraineeProfileResponse update(@Valid @RequestBody UpdateTraineeRequest updateTraineeRequest) {
         Trainee trainee = traineeService.getByUsername(updateTraineeRequest.getUsername());
 
         trainee.getUser().setFirstName(updateTraineeRequest.getFirstName());
@@ -150,7 +151,7 @@ public class TraineeController {
 
     //updates trainer list
     @PutMapping("/trainer-list")
-    public List<TrainerInfoResponse> updateTrainerList(@RequestBody UpdateTrainerListRequest request) {
+    public List<TrainerInfoResponse> updateTrainerList(@Valid @RequestBody UpdateTrainerListRequest request) {
         traineeService.updateTrainerList(request.getTraineeUsername(), request.getTrainerIds());
 
         Trainee trainee = traineeService.getByUsername(request.getTraineeUsername());

@@ -11,6 +11,7 @@ import com.gym.services.TrainerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +37,7 @@ public class TrainerController {
                     @ApiResponse(responseCode = "201", description = "Trainer registered successfully")
             }
     )
-    public RegistrationResponse register(@RequestBody TrainerRegistrationRequest registrationRequest) {
+    public RegistrationResponse register(@Valid @RequestBody TrainerRegistrationRequest registrationRequest) {
         User user = new User();
         user.setFirstName(registrationRequest.getFirstName());
         user.setLastName(registrationRequest.getLastName());
@@ -78,7 +79,7 @@ public class TrainerController {
 
     //updates trainer info
     @PutMapping
-    public TrainerProfileResponse update(@RequestBody UpdateTrainerRequest request) {
+    public TrainerProfileResponse update(@Valid @RequestBody UpdateTrainerRequest request) {
 
         Trainer trainer = trainerService.getByUsername(request.getUsername());
 

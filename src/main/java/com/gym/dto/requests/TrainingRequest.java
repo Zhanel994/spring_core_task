@@ -1,13 +1,29 @@
 package com.gym.dto.requests;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Positive;
+
 import java.time.LocalDate;
 
 public class TrainingRequest {
+    @NotBlank
     private String traineeUsername;
+
+    @NotBlank
     private String trainerUsername;
+
+    @NotBlank
     private String trainingName;
+
+    @NotNull
     private LocalDate trainingDate;
+
+    @Positive
     private int duration;
+
+    @NotBlank
     private String trainingType;
 
     public String getTraineeUsername() {

@@ -1,8 +1,15 @@
 package com.gym.dto.requests;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class ChangePasswordRequest {
+    @NotBlank
     private String username;
+
+    @NotBlank
     private String oldPassword;
+
+    @NotBlank
     private String newPassword;
 
     public String getUsername() {

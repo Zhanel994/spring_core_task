@@ -1,11 +1,20 @@
 package com.gym.dto.requests;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
+
 import java.time.LocalDate;
 
 public class TraineeRegistrationRequest {
+    @NotBlank
     private String firstName;
+    @NotBlank
     private String lastName;
+
+    @Past
     private LocalDate dateOfBirth;
+
+    @NotBlank
     private String address;
 
     public String getFirstName() {
