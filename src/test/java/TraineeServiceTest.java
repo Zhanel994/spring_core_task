@@ -1,5 +1,6 @@
 import com.gym.dao.TraineeDao;
 import com.gym.dao.TrainerDao;
+import com.gym.dto.responses.RegistrationResponse;
 import com.gym.exceptions.ValidationException;
 import com.gym.models.Trainee;
 import com.gym.models.Trainer;
@@ -9,6 +10,7 @@ import com.gym.utils.PasswordGenerator;
 import com.gym.utils.UsernameGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
@@ -21,6 +23,7 @@ class TraineeServiceTest {
     private TrainerDao trainerDao;
     private UsernameGenerator usernameGenerator;
     private PasswordGenerator passwordGenerator;
+    private PasswordEncoder passwordEncoder;
 
     private TraineeService service;
 
@@ -30,12 +33,14 @@ class TraineeServiceTest {
         trainerDao = mock(TrainerDao.class);
         usernameGenerator = mock(UsernameGenerator.class);
         passwordGenerator = mock(PasswordGenerator.class);
+        passwordEncoder = mock(PasswordEncoder.class);
 
         service = new TraineeService(
                 traineeDao,
                 trainerDao,
                 usernameGenerator,
-                passwordGenerator
+                passwordGenerator,
+                passwordEncoder
         );
     }
 
@@ -54,11 +59,16 @@ class TraineeServiceTest {
         when(passwordGenerator.generate())
                 .thenReturn("123456789");
 
-        Trainee result = service.create(trainee);
+        when(passwordEncoder.encode("123456789"))
+                .thenReturn("encodedPassword");
 
-        assertEquals("John.Smith", result.getUser().getUsername());
-        assertEquals("123456789", result.getUser().getPassword());
-        assertTrue(result.getUser().isActive());
+        RegistrationResponse result = service.create(trainee);
+
+        assertEquals("John.Smith", result.getUsername());
+        assertEquals("123456789", result.getPassword());
+        assertEquals("John.Smith", trainee.getUser().getUsername());
+        assertEquals("encodedPassword", trainee.getUser().getPassword());
+        assertTrue(trainee.getUser().isActive());
 
         verify(traineeDao).save(trainee);
     }
@@ -85,9 +95,13 @@ class TraineeServiceTest {
         when(traineeDao.findByUsername("john"))
                 .thenReturn(trainee);
 
+        when(passwordEncoder.encode("newPass"))
+                .thenReturn("encodedNewPass");
+
         service.changePassword("john", "newPass");
 
-        assertEquals("newPass", trainee.getUser().getPassword());
+        assertEquals("encodedNewPass", user.getPassword());
+
         verify(traineeDao).save(trainee);
     }
 

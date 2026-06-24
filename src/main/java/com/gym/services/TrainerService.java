@@ -1,6 +1,7 @@
 package com.gym.services;
 
 import com.gym.dao.TrainerDao;
+import com.gym.dto.responses.RegistrationResponse;
 import com.gym.exceptions.EntityNotFoundException;
 import com.gym.exceptions.ValidationException;
 import com.gym.models.Trainer;
@@ -9,6 +10,7 @@ import com.gym.utils.PasswordGenerator;
 import com.gym.utils.UsernameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
@@ -23,31 +25,41 @@ public class TrainerService {
     private final TrainerDao trainerDao;
     private final UsernameGenerator usernameGenerator;
     private final PasswordGenerator passwordGenerator;
+    private final PasswordEncoder passwordEncoder;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public TrainerService(TrainerDao trainerDao, UsernameGenerator usernameGenerator, PasswordGenerator passwordGenerator) {
+    public TrainerService(TrainerDao trainerDao, UsernameGenerator usernameGenerator, PasswordGenerator passwordGenerator, PasswordEncoder passwordEncoder) {
         this.trainerDao = trainerDao;
         this.usernameGenerator = usernameGenerator;
         this.passwordGenerator = passwordGenerator;
+        this.passwordEncoder = passwordEncoder;
     }
 
     //creates trainer
-    public Trainer create(Trainer trainer) {
+    public RegistrationResponse create(Trainer trainer) {
         validate(trainer);
 
         User user = trainer.getUser();
 
-        user.setUsername(usernameGenerator.generate(user.getFirstName(), user.getLastName()));
-        user.setPassword(passwordGenerator.generate());
+        String username = usernameGenerator.generate(
+                user.getFirstName(),
+                user.getLastName()
+        );
+
+        String rawPassword = passwordGenerator.generate();
+
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(rawPassword));
         user.setActive(true);
 
         trainerDao.save(trainer);
 
-        log.info("Trainer created: {}", user.getUsername());
-
-        return trainer;
+        return new RegistrationResponse(
+                username,
+                rawPassword
+        );
     }
 
     //updates existing trainer
@@ -73,7 +85,7 @@ public class TrainerService {
             throw new EntityNotFoundException("Trainer not found!");
         }
 
-        trainer.getUser().setPassword(newPassword);
+        trainer.getUser().setPassword(passwordEncoder.encode(newPassword));
 
         trainerDao.save(trainer);
     }

@@ -46,9 +46,7 @@ public class TrainerController {
         trainer.setUser(user);
         trainer.setSpecialization(registrationRequest.getSpecialization());
 
-        Trainer created = trainerService.create(trainer);
-
-        return new RegistrationResponse(created.getUser().getUsername(), created.getUser().getPassword());
+        return trainerService.create(trainer);
     }
 
     //returns trainer profile by username

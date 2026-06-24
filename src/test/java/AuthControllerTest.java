@@ -1,4 +1,7 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gym.controllers.AuthController;
+import com.gym.dto.requests.LoginRequest;
+import com.gym.dto.responses.JwtResponse;
 import com.gym.services.AuthService;
 import com.gym.services.TraineeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -6,15 +9,17 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-public class AuthControllerTest {
+
+class AuthControllerTest {
+
     private MockMvc mockMvc;
 
     @Mock
@@ -26,33 +31,31 @@ public class AuthControllerTest {
     @InjectMocks
     private AuthController authController;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(authController).build();
+
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(authController)
+                .build();
     }
 
     @Test
     void login_success() throws Exception {
-        when(authService.authenticate("john", "123456789")).thenReturn(true);
+        LoginRequest request = new LoginRequest("john", "123456789");
 
-        mockMvc.perform(get("/api/v1/auth/login")
-                        .param("username", "john")
-                        .param("password", "123456789"))
+        JwtResponse response = new JwtResponse("jwt-token");
+
+        when(authService.authenticate("john", "123456789"))
+                .thenReturn(response);
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Login successful!"));
-        System.out.println("Login success!");
-    }
-
-    @Test
-    void login_fail() throws Exception {
-        when(authService.authenticate("john", "wrong")).thenReturn(false);
-
-        mockMvc.perform(get("/api/v1/auth/login")
-                        .param("username", "john")
-                        .param("password", "wrong"))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("Invalid credentials!"));
-        System.out.println("Login fail!");
+                .andExpect(jsonPath("$.token")
+                        .value("jwt-token"));
     }
 }

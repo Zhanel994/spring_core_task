@@ -1,4 +1,5 @@
 import com.gym.dao.TrainerDao;
+import com.gym.dto.responses.RegistrationResponse;
 import com.gym.exceptions.ValidationException;
 import com.gym.models.Trainer;
 import com.gym.models.User;
@@ -7,6 +8,7 @@ import com.gym.utils.PasswordGenerator;
 import com.gym.utils.UsernameGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -16,6 +18,7 @@ class TrainerServiceTest {
     private TrainerDao trainerDao;
     private UsernameGenerator usernameGenerator;
     private PasswordGenerator passwordGenerator;
+    private PasswordEncoder passwordEncoder;
 
     private TrainerService service;
 
@@ -24,11 +27,13 @@ class TrainerServiceTest {
         trainerDao = mock(TrainerDao.class);
         usernameGenerator = mock(UsernameGenerator.class);
         passwordGenerator = mock(PasswordGenerator.class);
+        passwordEncoder = mock(PasswordEncoder.class);
 
         service = new TrainerService(
                 trainerDao,
                 usernameGenerator,
-                passwordGenerator
+                passwordGenerator,
+                passwordEncoder
         );
     }
 
@@ -47,10 +52,16 @@ class TrainerServiceTest {
         when(passwordGenerator.generate())
                 .thenReturn("password");
 
-        Trainer result = service.create(trainer);
 
-        assertEquals("Michael.Jordan", result.getUser().getUsername());
-        assertEquals("password", result.getUser().getPassword());
+        when(passwordEncoder.encode("password"))
+                .thenReturn("encodedPassword");
+
+        RegistrationResponse result = service.create(trainer);
+
+        assertEquals("Michael.Jordan", result.getUsername());
+        assertEquals("password", result.getPassword());
+        assertEquals("Michael.Jordan", trainer.getUser().getUsername());
+        assertEquals("encodedPassword", trainer.getUser().getPassword());
 
         verify(trainerDao).save(trainer);
     }
@@ -125,8 +136,14 @@ class TrainerServiceTest {
         when(trainerDao.findByUsername("michael"))
                 .thenReturn(trainer);
 
-        service.changePassword("michael", "new");
+        when(passwordEncoder.encode("newPass"))
+                .thenReturn("encodedNewPass");
 
-        assertEquals("new", user.getPassword());
+        service.changePassword("michael", "newPass");
+
+        assertEquals("encodedNewPass", user.getPassword());
+
+        verify(trainerDao).save(trainer);
+
     }
 }

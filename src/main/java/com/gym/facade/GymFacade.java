@@ -1,5 +1,6 @@
 package com.gym.facade;
 
+import com.gym.dto.responses.RegistrationResponse;
 import com.gym.models.Trainee;
 import com.gym.models.Trainer;
 import com.gym.models.Training;
@@ -23,11 +24,11 @@ public class GymFacade {
         this.trainingService = trainingService;
     }
 
-    public Trainee createTrainee(Trainee trainee){
+    public RegistrationResponse createTrainee(Trainee trainee){
         return traineeService.create(trainee);
     }
 
-    public Trainer createTrainer(Trainer trainer){
+    public RegistrationResponse createTrainer(Trainer trainer){
         return trainerService.create(trainer);
     }
 

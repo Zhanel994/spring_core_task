@@ -42,19 +42,17 @@ public class TraineeController {
                     @ApiResponse(responseCode = "201", description = "Trainee registered successfully")
             }
     )
-    public RegistrationResponse register(@Valid @RequestBody TraineeRegistrationRequest registrationRequest) {
+    public RegistrationResponse register(@Valid @RequestBody TraineeRegistrationRequest request) {
         User user = new User();
-        user.setFirstName(registrationRequest.getFirstName());
-        user.setLastName(registrationRequest.getLastName());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
 
         Trainee trainee = new Trainee();
         trainee.setUser(user);
-        trainee.setDateOfBirth(registrationRequest.getDateOfBirth());
-        trainee.setAddress(registrationRequest.getAddress());
+        trainee.setDateOfBirth(request.getDateOfBirth());
+        trainee.setAddress(request.getAddress());
 
-        Trainee created = traineeService.create(trainee);
-
-        return new RegistrationResponse(created.getUser().getUsername(), created.getUser().getPassword());
+        return traineeService.create(trainee);
     }
 
     //returns trainee profile by username
