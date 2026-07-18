@@ -3,10 +3,11 @@ package com.gym.dto.requests;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 
-public class TrainingWorkloadRequest {
+public class TrainingWorkloadRequest implements Serializable {
     @NotBlank
     private String trainerUsername;
 

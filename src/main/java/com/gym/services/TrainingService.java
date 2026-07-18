@@ -4,6 +4,7 @@ import com.gym.clients.TrainerWorkloadClient;
 import com.gym.dao.TrainingDao;
 import com.gym.dto.requests.TrainingWorkloadRequest;
 import com.gym.exceptions.ValidationException;
+import com.gym.jms.TrainerWorkloadProducer;
 import com.gym.models.Training;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +21,11 @@ public class TrainingService {
     private static final Logger log = LoggerFactory.getLogger(TrainingService.class);
 
     private final TrainingDao trainingDao;
-    private final TrainerWorkloadService trainerWorkloadService;
+    private final TrainerWorkloadProducer trainerWorkloadProducer;
 
-    public TrainingService(TrainingDao trainingDao, TrainerWorkloadService trainerWorkloadService) {
+    public TrainingService(TrainingDao trainingDao, TrainerWorkloadProducer trainerWorkloadProducer) {
         this.trainingDao = trainingDao;
-        this.trainerWorkloadService = trainerWorkloadService;
+        this.trainerWorkloadProducer = trainerWorkloadProducer;
     }
 
     //creates new training
@@ -70,7 +71,7 @@ public class TrainingService {
 
         request.setActionType("ADD");
 
-        trainerWorkloadService.updateWorkload(request);
+        trainerWorkloadProducer.send(request);
 
         log.info("Training created: {}", training.getTrainingName());
 
