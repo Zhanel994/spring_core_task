@@ -17,28 +17,24 @@ import java.util.UUID;
 //generates transactionId for each request
 @Component
 public class TransactionIdFilter extends OncePerRequestFilter {
-    private static final Logger logger = LoggerFactory.getLogger(TransactionIdFilter.class);
-
     private static final String TRANSACTION_ID = "transactionId";
 
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
-            HttpServletResponse response,
+            jakarta.servlet.http.HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-
         String transactionId = UUID.randomUUID().toString();
 
         MDC.put(TRANSACTION_ID, transactionId);
-        response.setHeader("X-Transaction-Id", transactionId);
 
-        logger.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
+        response.setHeader("transactionId", transactionId);
 
         try {
             filterChain.doFilter(request, response);
         } finally {
-            MDC.clear();
+            MDC.remove(TRANSACTION_ID);
         }
     }
 }
