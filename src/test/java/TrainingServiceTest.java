@@ -1,5 +1,6 @@
 import com.gym.dao.TrainingDao;
 import com.gym.exceptions.ValidationException;
+import com.gym.jms.TrainerWorkloadProducer;
 import com.gym.models.*;
 import com.gym.services.TrainingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,11 +16,17 @@ class TrainingServiceTest {
 
     private TrainingDao trainingDao;
     private TrainingService service;
+    private TrainerWorkloadProducer trainerWorkloadProducer;
 
     @BeforeEach
     void setUp() {
         trainingDao = mock(TrainingDao.class);
-        service = new TrainingService(trainingDao);
+        trainerWorkloadProducer = mock(TrainerWorkloadProducer.class);
+
+        service = new TrainingService(
+                trainingDao,
+                trainerWorkloadProducer
+        );
     }
 
     @Test
