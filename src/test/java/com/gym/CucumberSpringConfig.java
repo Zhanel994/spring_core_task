@@ -5,6 +5,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 //configuration class for cucumber and spring integration
 @CucumberContextConfiguration
-@SpringBootTest(classes = GymApplication.class,  properties = {"spring.profiles.active=test"})
+@SpringBootTest(classes = GymApplication.class)
 public class CucumberSpringConfig {
 }

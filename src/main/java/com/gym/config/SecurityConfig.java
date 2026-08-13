@@ -68,8 +68,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/trainees/register").permitAll()
                         .requestMatchers("/api/v1/trainers/register").permitAll()
-                        .anyRequest()
-                        .authenticated()
+                        .requestMatchers("/api/v1/trainings").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .build();
     }

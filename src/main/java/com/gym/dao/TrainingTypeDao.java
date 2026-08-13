@@ -22,4 +22,12 @@ public class TrainingTypeDao {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("TrainingType not found"));
     }
+
+    public void save(TrainingType trainingType) {
+        if (trainingType.getId() == null) {
+            em.persist(trainingType);
+        } else {
+            em.merge(trainingType);
+        }
+    }
 }
